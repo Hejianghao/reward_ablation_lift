@@ -65,7 +65,7 @@ models:
 # https://skrl.readthedocs.io/en/latest/api/memories/random.html
 memory:
   class: RandomMemory
-  memory_size: 16000
+  memory_size: 1000000
 
 
 # SAC agent configuration (field names are from SAC_DEFAULT_CONFIG)
@@ -73,7 +73,7 @@ memory:
 agent:
   class: SAC
   gradient_steps: 1
-  batch_size: 4096
+  batch_size: 256
   discount_factor: 0.99
   polyak: 0.005
   actor_learning_rate: 5.0e-4
@@ -83,8 +83,8 @@ agent:
   learning_rate_scheduler_kwargs: null
   state_preprocessor: RunningStandardScaler
   state_preprocessor_kwargs: null
-  random_timesteps: 50
-  learning_starts: 50
+  random_timesteps: 1000
+  learning_starts: 5000
   grad_norm_clip: 0
   learn_entropy: True
   initial_entropy_value: 0.2
@@ -103,5 +103,5 @@ agent:
 # https://skrl.readthedocs.io/en/latest/api/trainers/sequential.html
 trainer:
   class: SequentialTrainer
-  timesteps: 50000
+  timesteps: 1500000
   environment_info: log
