@@ -51,7 +51,7 @@ parser.add_argument(
     "--algorithm",
     type=str,
     default="PPO",
-    choices=["AMP", "PPO", "IPPO", "MAPPO"],
+    choices=["AMP", "DDPG", "IPPO", "MAPPO", "PPO", "SAC", "TD3"],
     help="The RL algorithm used for training the skrl agent.",
 )
 parser.add_argument(
@@ -147,7 +147,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         env_cfg.sim.device = f"cuda:{app_launcher.local_rank}"
     # max iterations for training
     if args_cli.max_iterations:
-        agent_cfg["trainer"]["timesteps"] = args_cli.max_iterations * agent_cfg["agent"]["rollouts"]
+        if "rollouts" in agent_cfg.get("agent", {}):
+            agent_cfg["trainer"]["timesteps"] = args_cli.max_iterations * agent_cfg["agent"]["rollouts"]
+        else:
+            agent_cfg["trainer"]["timesteps"] = args_cli.max_iterations
     agent_cfg["trainer"]["close_environment_at_exit"] = False
     # configure the ML framework into the global skrl variable
     if args_cli.ml_framework.startswith("jax"):
