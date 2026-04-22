@@ -14,23 +14,32 @@ def _ensure_log_dict(env):
     if "log" not in env.extras:
         env.extras["log"] = {}
 
-def lift_episode_success_rate(env, minimal_height: float = 0.04):
+def lift_episode_success_rate(env, minimal_height: float = 0.1, sustained_steps: int = 50):
     is_lifted = object_is_lifted(env, minimal_height=minimal_height).bool()
 
     if not hasattr(env, "_lift_ever_succeeded"):
         env._lift_ever_succeeded = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
+        env._lift_consecutive_steps = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
 
-    # report success rate for envs whose episode just ended
+    # report and reset for envs whose episode just ended
     just_reset = (env.episode_length_buf == 0)
     if just_reset.any():
         _ensure_log_dict(env)
         env.extras["log"]["lift_episode_success_rate"] = env._lift_ever_succeeded[just_reset].float().mean()
         env._lift_ever_succeeded[just_reset] = False
+        env._lift_consecutive_steps[just_reset] = 0
 
-    # accumulate across timesteps within the episode
-    env._lift_ever_succeeded = is_lifted
+    # increment counter if lifted this step, reset to 0 otherwise
+    env._lift_consecutive_steps = torch.where(
+        is_lifted,
+        env._lift_consecutive_steps + 1,
+        torch.zeros_like(env._lift_consecutive_steps),
+    )
 
-    return is_lifted.float()
+    # success once sustained for enough consecutive steps (stays True for rest of episode)
+    env._lift_ever_succeeded |= (env._lift_consecutive_steps >= sustained_steps)
+
+    return env._lift_ever_succeeded.float()
 
 def placement_success_rate(env, distance_threshold: float = 0.05):
     _ensure_log_dict(env)
