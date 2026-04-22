@@ -35,6 +35,16 @@ gym.register(
 )
 
 gym.register(
+    id="RGB-Franka-Lift",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.rgb_camera_env_cfg:FrankaCubeLiftRGBCameraEnvCfg",
+        "skrl_cfg_entry_point": f"{agents.__name__}:rgb_skrl_ppo_cfg.yaml",
+    },
+    disable_env_checker=True,
+)
+
+gym.register(
     id="My-Lift-Ablation-No-Fine-Grained",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     kwargs={
