@@ -8,7 +8,7 @@ import math
 from isaaclab.utils import configclass
 
 import isaaclab_tasks.manager_based.manipulation.reach.mdp as mdp
-from isaaclab_tasks.manager_based.manipulation.reach.reach_env_cfg import ReachEnvCfg
+from reward_ablation_lift.tasks.manager_based.reach.reach_env_cfg import ReachEnvCfg
 
 ##
 # Pre-defined configs
@@ -33,6 +33,8 @@ class FrankaReachEnvCfg(ReachEnvCfg):
         self.rewards.end_effector_position_tracking.params["asset_cfg"].body_names = ["panda_hand"]
         self.rewards.end_effector_position_tracking_fine_grained.params["asset_cfg"].body_names = ["panda_hand"]
         self.rewards.end_effector_orientation_tracking.params["asset_cfg"].body_names = ["panda_hand"]
+        # override metrics
+        self.observations.metrics.rmse_position_error.params["asset_cfg"].body_names = ["panda_hand"]
 
         # override actions
         self.actions.arm_action = mdp.JointPositionActionCfg(

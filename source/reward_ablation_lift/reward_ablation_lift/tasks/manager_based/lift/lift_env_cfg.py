@@ -22,6 +22,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from . import mdp
+import reward_ablation_lift.tasks.manager_based.lift.mdp as my_mdp
 
 ##
 # Scene definition
@@ -91,6 +92,17 @@ class ActionsCfg:
     arm_action: mdp.JointPositionActionCfg | mdp.DifferentialInverseKinematicsActionCfg = MISSING
     gripper_action: mdp.BinaryJointPositionActionCfg = MISSING
 
+@configclass
+class MetricsCfg(ObsGroup):
+    """Metrics logged to TensorBoard but not used as policy input."""
+
+    lift_episode_success_rate = ObsTerm(
+        func=my_mdp.lift_episode_success_rate,
+    )
+
+    def __post_init__(self):
+        self.enable_corruption = False
+        self.concatenate_terms = False
 
 @configclass
 class ObservationsCfg:
@@ -112,6 +124,8 @@ class ObservationsCfg:
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
+    # metrics group is defined for logging purposes, not used as policy input
+    metrics: MetricsCfg = MetricsCfg()
 
 
 @configclass

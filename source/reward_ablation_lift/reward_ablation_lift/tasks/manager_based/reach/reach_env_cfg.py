@@ -26,6 +26,7 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
 import isaaclab_tasks.manager_based.manipulation.reach.mdp as mdp
+import reward_ablation_lift.tasks.manager_based.reach.mdp as my_mdp
 
 ##
 # Scene definition
@@ -95,6 +96,20 @@ class ActionsCfg:
 
 
 @configclass
+class MetricsCfg(ObsGroup):
+    """Metrics logged to TensorBoard but not used as policy input."""
+
+    rmse_position_error = ObsTerm(
+        func=my_mdp.reach_rmse_position_error,
+        params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
+    )
+
+    def __post_init__(self):
+        self.enable_corruption = False
+        self.concatenate_terms = False
+
+
+@configclass
 class ObservationsCfg:
     """Observation specifications for the MDP."""
 
@@ -114,6 +129,8 @@ class ObservationsCfg:
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
+    # metrics group is defined for logging purposes, not used as policy input
+    metrics: MetricsCfg = MetricsCfg()
 
 
 @configclass
@@ -178,7 +195,6 @@ class CurriculumCfg:
     joint_vel = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -0.001, "num_steps": 4500}
     )
-
 
 ##
 # Environment configuration
