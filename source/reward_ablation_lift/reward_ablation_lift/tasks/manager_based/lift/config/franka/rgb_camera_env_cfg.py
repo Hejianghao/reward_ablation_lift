@@ -20,7 +20,7 @@ class CameraObjectTableSceneCfg(ObjectTableSceneCfg):
         prim_path="{ENV_REGEX_NS}/Camera",
         offset=TiledCameraCfg.OffsetCfg(
             pos=(0.5, 0.0, 2.0),
-            rot=(0.7071068, 0.0, 0.7071068, 0.0),
+            rot=(0.7071068, 0.7071068, 0.0, 0.0),
             convention="world",
         ),
         data_types=["rgb"],
@@ -45,7 +45,7 @@ class RGBCameraObservationsCfg(ObservationsCfg):
 
         image = ObsTerm(
             func=mdp.image,
-            params={"sensor_cfg": SceneEntityCfg("tiled_camera"), "data_type": "rgb", "normalize": False},
+            params={"sensor_cfg": SceneEntityCfg("tiled_camera"), "data_type": "rgb", "normalize": True},
         )
         proprio = ObsTerm(func=lift_mdp.proprio_observations)
 
