@@ -29,7 +29,7 @@ models:
           - flatten
           - linear: 50
           - layer_norm: 50 
-        activations: [relu, relu, relu, relu, tanh]   # ← 最后用 tanh
+        activations: [relu, relu, relu, tanh]   # ← 最后用 tanh
       
       # MLP 分支 (proprio)
       - name: proprio_features
