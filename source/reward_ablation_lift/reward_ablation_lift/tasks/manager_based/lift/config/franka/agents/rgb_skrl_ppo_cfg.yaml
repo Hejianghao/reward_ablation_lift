@@ -22,24 +22,17 @@ models:
       - name: cnn_features
         input: permute(OBSERVATIONS["image"], (0, 3, 1, 2))
         layers:
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 2}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 16, kernel_size: 8, stride: 4, padding: 0}
+          - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
           - flatten
-          - linear: 50
-        activations: relu
-      
-      # MLP 分支 (proprio)
-      - name: proprio_features
-        input: OBSERVATIONS["proprio"]
-        layers: [64, 64]
-        activations: elu
+          - linear: 64
+        activations: [relu, relu, relu, null, relu]
       
       # 合并后的 head
       - name: net
         input: concatenate([cnn_features, proprio_features])
-        layers: [128, 64]
+        layers: [64, 128]
         activations: elu
     output: ACTIONS
 
@@ -51,22 +44,16 @@ models:
       - name: cnn_features
         input: permute(OBSERVATIONS["image"], (0, 3, 1, 2))
         layers:
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 2}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 16, kernel_size: 8, stride: 4, padding: 0}
+          - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
           - flatten
-          - linear: 50
-        activations: relu
-      
-      - name: proprio_features
-        input: OBSERVATIONS["proprio"]
-        layers: [64, 64]
-        activations: elu
+          - linear: 64
+        activations: [relu, relu, relu, null, relu]
 
       - name: net
         input: concatenate([cnn_features, proprio_features])
-        layers: [128, 64]
+        layers: [64, 128]
         activations: elu
     output: ONE
 
@@ -82,18 +69,18 @@ memory:
 # https://skrl.readthedocs.io/en/latest/api/agents/ppo.html
 agent:
   class: PPO
-  rollouts: 24
-  learning_epochs: 8
+  rollouts: 16
+  learning_epochs: 6
   mini_batches: 4
   discount_factor: 0.99
   lambda: 0.95
-  learning_rate: 1.0e-04
+  learning_rate: 3.0e-04
   learning_rate_scheduler: KLAdaptiveLR
   learning_rate_scheduler_kwargs:
     kl_threshold: 0.01
-  state_preprocessor: null
+  state_preprocessor: RunningStandardScaler
   state_preprocessor_kwargs: null
-  value_preprocessor: null
+  value_preprocessor: RunningStandardScaler
   value_preprocessor_kwargs: null
   random_timesteps: 0
   learning_starts: 0
@@ -101,11 +88,12 @@ agent:
   ratio_clip: 0.2
   value_clip: 0.2
   clip_predicted_values: True
-  entropy_loss_scale: 0.001
+  entropy_loss_scale: 0.01
   value_loss_scale: 2.0
   kl_threshold: 0.0
-  rewards_shaper_scale: 0.01
+  rewards_shaper_scale: 1.0
   time_limit_bootstrap: False
+  mixed_precision: True
   # logging and checkpoint
   experiment:
     directory: "franka_lift"
@@ -119,5 +107,6 @@ agent:
 # https://skrl.readthedocs.io/en/latest/api/trainers/sequential.html
 trainer:
   class: SequentialTrainer
-  timesteps: 50000
+  timesteps: 150000
+  disable_progressbar: True
   environment_info: log

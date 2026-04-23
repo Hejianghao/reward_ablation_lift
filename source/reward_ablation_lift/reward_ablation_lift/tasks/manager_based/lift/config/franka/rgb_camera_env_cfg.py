@@ -59,7 +59,7 @@ class RGBCameraObservationsCfg(ObservationsCfg):
 @configclass
 class FrankaCubeLiftRGBCameraEnvCfg(FrankaCubeLiftEnvCfg):
     # Replace scene with camera-enabled version
-    scene: CameraObjectTableSceneCfg = CameraObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)
+    scene: CameraObjectTableSceneCfg = CameraObjectTableSceneCfg(num_envs=256, env_spacing=2.5)
     observations: RGBCameraObservationsCfg = RGBCameraObservationsCfg()
 
     def __post_init__(self):
