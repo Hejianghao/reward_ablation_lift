@@ -31,7 +31,7 @@ models:
       
       # 合并后的 head
       - name: net
-        input: concatenate([cnn_features, proprio_features])
+        input: concatenate([cnn_features, OBSERVATIONS["proprio"]])
         layers: [64, 128]
         activations: elu
     output: ACTIONS
@@ -52,7 +52,7 @@ models:
         activations: [relu, relu, relu, null, relu]
 
       - name: net
-        input: concatenate([cnn_features, proprio_features])
+        input: concatenate([cnn_features, OBSERVATIONS["proprio"]])
         layers: [64, 128]
         activations: elu
     output: ONE
@@ -107,6 +107,6 @@ agent:
 # https://skrl.readthedocs.io/en/latest/api/trainers/sequential.html
 trainer:
   class: SequentialTrainer
-  timesteps: 150000
-  disable_progressbar: True
+  timesteps: 75000
+  # disable_progressbar: True
   environment_info: log
