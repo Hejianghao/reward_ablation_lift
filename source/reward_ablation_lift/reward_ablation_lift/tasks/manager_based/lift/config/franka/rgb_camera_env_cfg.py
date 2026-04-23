@@ -1,5 +1,6 @@
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
 from isaaclab.managers import ObservationTermCfg as ObsTerm
+from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.sensors import TiledCameraCfg
 import isaaclab.envs.mdp as mdp
@@ -7,7 +8,7 @@ import isaaclab.sim as sim_utils
 from isaaclab.utils import configclass
 
 import reward_ablation_lift.tasks.manager_based.lift.mdp as lift_mdp
-from reward_ablation_lift.tasks.manager_based.lift.lift_env_cfg import ObjectTableSceneCfg, ObservationsCfg
+from reward_ablation_lift.tasks.manager_based.lift.lift_env_cfg import ObjectTableSceneCfg, ObservationsCfg, RewardsCfg
 
 from .joint_pos_env_cfg import FrankaCubeLiftEnvCfg
 from isaaclab.utils.noise.noise_cfg import GaussianNoiseCfg
@@ -93,10 +94,35 @@ class RGBCameraObservationsCfg(ObservationsCfg):
 
 
 @configclass
+class RGBCameraRewardsCfg(RewardsCfg):
+    """Reward terms for the RGB camera lift task."""
+    # same reward terms as in the base env
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.25}, weight=1.0)
+
+    reaching_object_fine_grained = RewTerm(func=mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
+
+    
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=25.0)
+
+    object_goal_tracking = RewTerm(
+        func=mdp.object_goal_distance,
+        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
+        weight=30.0,
+    )
+
+    object_goal_tracking_fine_grained = RewTerm(
+        func=mdp.object_goal_distance,
+        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
+        weight=10.0,
+    )
+
+
+@configclass
 class FrankaCubeLiftRGBCameraEnvCfg(FrankaCubeLiftEnvCfg):
     # Replace scene with camera-enabled version
     scene: CameraObjectTableSceneCfg = CameraObjectTableSceneCfg(num_envs=512, env_spacing=2.5)
     observations: RGBCameraObservationsCfg = RGBCameraObservationsCfg()
+    rewards: RGBCameraRewardsCfg = RGBCameraRewardsCfg()
 
     def __post_init__(self):
         # parent sets scene.robot, scene.object, scene.ee_frame
