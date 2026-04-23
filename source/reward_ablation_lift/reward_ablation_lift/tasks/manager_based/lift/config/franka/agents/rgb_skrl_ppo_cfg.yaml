@@ -28,8 +28,7 @@ models:
           - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
           - flatten
           - linear: 50
-          - layer_norm: 50 
-        activations: [relu, relu, relu, tanh]   # ← 最后用 tanh
+        activations: relu
       
       # MLP 分支 (proprio)
       - name: proprio_features
@@ -58,8 +57,7 @@ models:
           - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
           - flatten
           - linear: 50
-          - layer_norm: 50
-        activations: [relu, relu, relu, relu, tanh]
+        activations: relu
       
       - name: proprio_features
         input: OBSERVATIONS["proprio"]
