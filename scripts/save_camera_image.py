@@ -34,6 +34,7 @@ def main():
     env = gym.make(args_cli.task, cfg=env_cfg)
 
     env.reset()
+    env.step(torch.zeros(env.action_space.shape))
 
     # Raw sensor tensor: [num_envs, H, W, C], uint8 in [0, 255]
     camera_data = env.unwrapped.scene["tiled_camera"].data.output["rgb"]
