@@ -97,21 +97,21 @@ class RGBCameraObservationsCfg(ObservationsCfg):
 class RGBCameraRewardsCfg(RewardsCfg):
     """Reward terms for the RGB camera lift task."""
     # same reward terms as in the base env
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.25}, weight=1.0)
+    reaching_object = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.25}, weight=1.0)
 
-    reaching_object_fine_grained = RewTerm(func=mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
+    reaching_object_fine_grained = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
 
     
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=25.0)
+    lifting_object = RewTerm(func=lift_mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=25.0)
 
     object_goal_tracking = RewTerm(
-        func=mdp.object_goal_distance,
+        func=lift_mdp.object_goal_distance,
         params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
         weight=30.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
-        func=mdp.object_goal_distance,
+        func=lift_mdp.object_goal_distance,
         params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
         weight=10.0,
     )
