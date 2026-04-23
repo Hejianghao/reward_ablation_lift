@@ -65,7 +65,7 @@ models:
         input: OBSERVATIONS["proprio"]
         layers: [64, 64]
         activations: elu
-        
+
       - name: net
         input: concatenate([cnn_features, proprio_features])
         layers: [256, 128, 64]
@@ -113,12 +113,13 @@ agent:
     directory: "franka_lift"
     experiment_name: ""
     write_interval: auto
-    checkpoint_interval: auto
+    checkpoint_interval: 0         # 不存中间的
+    store_separately: False
 
 
 # Sequential trainer
 # https://skrl.readthedocs.io/en/latest/api/trainers/sequential.html
 trainer:
   class: SequentialTrainer
-  timesteps: 36000
+  timesteps: 50000
   environment_info: log
