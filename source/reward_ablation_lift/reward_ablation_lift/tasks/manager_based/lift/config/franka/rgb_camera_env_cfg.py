@@ -19,8 +19,8 @@ class CameraObjectTableSceneCfg(ObjectTableSceneCfg):
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Camera",
         offset=TiledCameraCfg.OffsetCfg(
-            pos=(0.5, 0.0, 2.0),
-            rot=(0.7071068, 0.7071068, 0.0, 0.0),
+            pos=(0.5, 0.0, 2.2),
+            rot=(0.7071068, 0.0, 0.7071068, 0.0),
             convention="world",
         ),
         data_types=["rgb"],
