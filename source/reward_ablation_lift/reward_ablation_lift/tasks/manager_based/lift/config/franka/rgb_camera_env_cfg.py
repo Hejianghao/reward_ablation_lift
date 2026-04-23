@@ -10,11 +10,29 @@ import reward_ablation_lift.tasks.manager_based.lift.mdp as lift_mdp
 from reward_ablation_lift.tasks.manager_based.lift.lift_env_cfg import ObjectTableSceneCfg, ObservationsCfg
 
 from .joint_pos_env_cfg import FrankaCubeLiftEnvCfg
+from isaaclab.utils.noise.noise_cfg import GaussianNoiseCfg
 
 
 @configclass
 class CameraObjectTableSceneCfg(ObjectTableSceneCfg):
     """Scene with an added overhead tiled camera."""
+    # tiled_camera: TiledCameraCfg = TiledCameraCfg(
+    #     prim_path="{ENV_REGEX_NS}/Camera",
+    #     offset=TiledCameraCfg.OffsetCfg(
+    #         pos=(0.5, 0.0, 2.2),
+    #         rot=(0.7071068, 0.0, 0.7071068, 0.0),
+    #         convention="world",
+    #     ),
+    #     data_types=["rgb"],
+    #     spawn=sim_utils.PinholeCameraCfg(
+    #         focal_length=24.0,
+    #         focus_distance=400.0,
+    #         horizontal_aperture=20.955,
+    #         clipping_range=(0.1, 20.0),
+    #     ),
+    #     width=120,
+    #     height=160,
+    # )
 
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Camera",
@@ -38,12 +56,12 @@ class CameraObjectTableSceneCfg(ObjectTableSceneCfg):
                 0.0,
                 1.0,
             ],
-            height=240,
-            width=320,
+            height=120,
+            width=160,
             clipping_range=(0.01, 10.0),
         ),
-        width=320,
-        height=240,
+        height=120,
+        width=160,
     )
 
 
@@ -57,12 +75,18 @@ class RGBCameraObservationsCfg(ObservationsCfg):
 
         image = ObsTerm(
             func=mdp.image,
-            params={"sensor_cfg": SceneEntityCfg("tiled_camera"), "data_type": "rgb", "normalize": True},
+            params={
+                "sensor_cfg": SceneEntityCfg("tiled_camera"), 
+                "data_type": "rgb", 
+                "normalize": True,
+            },
+            noise=GaussianNoiseCfg(mean=0.0, std=0.04),
         )
+
         proprio = ObsTerm(func=lift_mdp.proprio_observations)
 
         def __post_init__(self):
-            self.enable_corruption = True
+            self.enable_corruption = False
             self.concatenate_terms = False
 
     policy: PolicyCfg = PolicyCfg()
