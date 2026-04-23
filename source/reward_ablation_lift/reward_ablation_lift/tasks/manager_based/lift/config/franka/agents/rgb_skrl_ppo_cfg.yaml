@@ -18,21 +18,25 @@ models:
     max_log_std: 2.0
     initial_log_std: 0.0
     network:
-      # CNN 分支：处理图像
+      # DrQ-v2 CNN Encoder
       - name: cnn_features
-        input: permute(OBSERVATIONS["image"], (0, 3, 1, 2))  # NHWC → NCHW
+        input: permute(OBSERVATIONS["image"], (0, 3, 1, 2))
         layers:
-          - conv2d: {out_channels: 32, kernel_size: 8, stride: 4}
-          - conv2d: {out_channels: 64, kernel_size: 4, stride: 2}
-          - conv2d: {out_channels: 64, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 2}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
           - flatten
-          - linear: 128
-        activations: elu
-      # MLP 分支:处理 proprioception
+          - linear: 50
+          - layer_norm: 50 
+        activations: [relu, relu, relu, relu, tanh]   # ← 最后用 tanh
+      
+      # MLP 分支 (proprio)
       - name: proprio_features
         input: OBSERVATIONS["proprio"]
         layers: [64, 64]
         activations: elu
+      
       # 合并后的 head
       - name: net
         input: concatenate([cnn_features, proprio_features])
@@ -40,26 +44,28 @@ models:
         activations: elu
     output: ACTIONS
 
-  value:  # see deterministic_model parameters
+  value:
     class: DeterministicMixin
     clip_actions: False
     network:
-      # CNN 分支（独立的 CNN，参数不与 policy 共享）
+      # DrQ-v2 CNN Encoder (独立参数)
       - name: cnn_features
         input: permute(OBSERVATIONS["image"], (0, 3, 1, 2))
         layers:
-          - conv2d: {out_channels: 32, kernel_size: 8, stride: 4}
-          - conv2d: {out_channels: 64, kernel_size: 4, stride: 2}
-          - conv2d: {out_channels: 64, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 2}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
+          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1}
           - flatten
-          - linear: 128
-        activations: elu
-      # MLP 分支
+          - linear: 50
+          - layer_norm: 50
+        activations: [relu, relu, relu, relu, tanh]
+      
       - name: proprio_features
         input: OBSERVATIONS["proprio"]
         layers: [64, 64]
         activations: elu
-      # 合并后的 head
+        
       - name: net
         input: concatenate([cnn_features, proprio_features])
         layers: [256, 128, 64]
