@@ -133,18 +133,6 @@ class RGBCameraRewardsCfg(RewardsCfg):
         params={"resting_z": 0.03, "target_height": 0.3, "std": 0.1, "normal_force_threshold": 3.0},
         weight=20.0,
     )
-
-    object_goal_tracking = RewTerm(
-        func=lift_mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=0.0,
-    )
-
-    object_goal_tracking_fine_grained = RewTerm(
-        func=lift_mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=0.0,
-    )
     
 
 

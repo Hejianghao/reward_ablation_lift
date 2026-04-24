@@ -53,7 +53,7 @@ class DepthCameraObservationsCfg(RGBCameraObservationsCfg):
                 "data_type": "depth",
                 "normalize": False,
             },
-            noise=GaussianNoiseCfg(mean=0.0, std=0.005),
+            noise=GaussianNoiseCfg(mean=0.0, std=0.003),
         )
 
         proprio = ObsTerm(func=lift_mdp.proprio_observations)

@@ -54,6 +54,5 @@ def proprio_observations(
 
     ee_pos = ee_position_in_robot_root_frame(env)
 
-    target_command = mdp.generated_commands(env, command_name=command_name)
     actions = mdp.last_action(env, action_name=action_name)
-    return torch.cat([joint_pos, joint_vel, ee_pos, target_command, actions], dim=-1)
+    return torch.cat([joint_pos, joint_vel, ee_pos, actions], dim=-1)

@@ -22,7 +22,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from . import mdp
-import reward_ablation_lift.tasks.manager_based.lift.mdp as my_mdp
+import reward_ablation_lift.tasks.manager_based.lift.mdp as lift_mdp
 
 ##
 # Scene definition
@@ -97,7 +97,7 @@ class MetricsCfg(ObsGroup):
     """Metrics logged to TensorBoard but not used as policy input."""
 
     lift_episode_success_rate = ObsTerm(
-        func=my_mdp.lift_episode_success_rate,
+        func=lift_mdp.lift_episode_success_rate,
     )
 
     def __post_init__(self):
@@ -115,7 +115,7 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
-        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -148,30 +148,20 @@ class EventCfg:
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
+    reaching_object = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.25}, weight=1.0)
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
+    reaching_object_fine_grained = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
 
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=15.0)
-
-    object_goal_tracking = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=16.0,
-    )
-
-    object_goal_tracking_fine_grained = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
+    grasping_object = RewTerm(
+        func=lift_mdp.object_is_grasped,
+        params={"normal_force_threshold": 3.0},
         weight=5.0,
     )
 
-    # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
-
-    joint_vel = RewTerm(
-        func=mdp.joint_vel_l2,
-        weight=-1e-4,
-        params={"asset_cfg": SceneEntityCfg("robot")},
+    lifting_object = RewTerm(
+        func=lift_mdp.object_lift_height,
+        params={"resting_z": 0.03, "target_height": 0.3, "std": 0.1, "normal_force_threshold": 3.0},
+        weight=20.0,
     )
 
 
@@ -213,7 +203,8 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
-    commands: CommandsCfg = CommandsCfg()
+    # commands: CommandsCfg = CommandsCfg()
+
     # MDP settings
     rewards: RewardsCfg = RewardsCfg()
     terminations: TerminationsCfg = TerminationsCfg()
