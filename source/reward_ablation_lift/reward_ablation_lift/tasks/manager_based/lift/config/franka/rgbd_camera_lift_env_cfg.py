@@ -75,7 +75,7 @@ class RGBDCameraObservationsCfg(ObservationsCfg):
 @configclass
 class RGBDCameraLiftEnvCfg(BaselineLiftEnvCfg):
     # Replace scene with camera-enabled version
-    scene: RGBDCameraLiftSceneCfg = RGBDCameraLiftSceneCfg(num_envs=256, env_spacing=2.5)
+    scene: RGBDCameraLiftSceneCfg = RGBDCameraLiftSceneCfg(num_envs=128, env_spacing=2.5)
     observations: RGBDCameraObservationsCfg = RGBDCameraObservationsCfg()
 
     
