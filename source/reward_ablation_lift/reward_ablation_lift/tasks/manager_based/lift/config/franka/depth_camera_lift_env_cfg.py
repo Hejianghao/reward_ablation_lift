@@ -17,18 +17,18 @@ from .baseline_lift_env_cfg import BaselineLiftEnvCfg
 class DepthCameraLiftSceneCfg(ObjectTableSceneCfg):
     """Scene with depth camera instead of RGB."""
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
-        prim_path="{ENV_REGEX_NS}/Camera",
+        prim_path="{ENV_REGEX_NS}/Robot/panda_hand",
         offset=TiledCameraCfg.OffsetCfg(
-            pos=(0.55, 0.0, 1.7),
-            rot=(0.7071068, 0.0, 0.7071068, 0.0),
-            convention="world",
+            pos=(0.0, 0.0, -0.05),       # 手腕后方 5cm
+            rot=(1.0, 0.0, 0.0, 0.0),   # 与 panda_hand 朝向一致
+            convention="ros",
         ),
         data_types=["depth"],
         spawn=sim_utils.PinholeCameraCfg(
-            focal_length=48.0,
+            focal_length=24.0,           # 缩短焦距，扩大 FOV
             focus_distance=400.0,
             horizontal_aperture=20.955,
-            clipping_range=(0.1, 20.0),
+            clipping_range=(0.02, 2.0),  # 近端截断改小，避免近距裁剪
         ),
         width=120,
         height=160,
