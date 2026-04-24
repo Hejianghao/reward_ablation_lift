@@ -51,7 +51,7 @@ class DepthCameraObservationsCfg(RGBCameraObservationsCfg):
             params={
                 "sensor_cfg": SceneEntityCfg("tiled_camera"),
                 "data_type": "depth",
-                "normalize": True,
+                "normalize": False,
             },
             noise=GaussianNoiseCfg(mean=0.0, std=0.005),
         )
