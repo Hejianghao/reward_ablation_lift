@@ -34,7 +34,12 @@ def main():
     env = gym.make(args_cli.task, cfg=env_cfg)
 
     env.reset()
-    env.step(torch.zeros(env.action_space.shape))
+    action = torch.zeros(env.action_space.shape)
+    step_dt = getattr(env.unwrapped, "step_dt", 0.02)
+    num_steps = max(1, round(1.0 / step_dt))
+    for _ in range(num_steps):
+        env.step(action)
+    print(f"[INFO] Stepped {num_steps} steps ({num_steps * step_dt:.3f}s) before capturing.")
 
     # Raw sensor tensor: [num_envs, H, W, C], uint8 in [0, 255]
     camera_data = env.unwrapped.scene["tiled_camera"].data.output["rgb"]
