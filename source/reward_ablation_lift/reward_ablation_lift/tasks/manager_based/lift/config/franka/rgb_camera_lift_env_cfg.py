@@ -17,7 +17,7 @@ from isaaclab.utils.noise.noise_cfg import GaussianNoiseCfg
 class RGBCameraLiftSceneCfg(ObjectTableSceneCfg):
     """Scene with an added overhead tiled camera."""
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/panda_hand",
+        prim_path="{ENV_REGEX_NS}/Robot/panda_hand/Camera",
         offset=TiledCameraCfg.OffsetCfg(
             pos=(0.0, 0.0, -0.05),       # 手腕后方 5cm
             rot=(1.0, 0.0, 0.0, 0.0),   # 与 panda_hand 朝向一致
