@@ -72,6 +72,8 @@ class FrankaCubeLiftDepthCameraEnvCfg(FrankaCubeLiftRGBCameraEnvCfg):
 
     def __post_init__(self):
         super().__post_init__()
+        # required so panda fingers expose the contact reporter API
+        self.scene.robot.spawn.activate_contact_sensors = True
 
 
 @configclass
