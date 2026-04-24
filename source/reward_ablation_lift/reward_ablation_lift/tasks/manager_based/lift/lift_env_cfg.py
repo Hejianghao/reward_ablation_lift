@@ -164,6 +164,14 @@ class RewardsCfg:
         weight=20.0,
     )
 
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
+
+    joint_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-1e-4,
+        params={"asset_cfg": SceneEntityCfg("robot")},
+    )
+
 
 @configclass
 class TerminationsCfg:
