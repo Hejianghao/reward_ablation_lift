@@ -10,14 +10,14 @@ from isaaclab.utils.noise.noise_cfg import GaussianNoiseCfg
 import reward_ablation_lift.tasks.manager_based.lift.mdp as lift_mdp
 
 from .rgb_camera_env_cfg import (
-    CameraObjectTableSceneCfg,
+    FrankaCameraObjectTableSceneCfg,
     RGBCameraObservationsCfg,
     FrankaCubeLiftRGBCameraEnvCfg,
 )
 
 
 @configclass
-class DepthCameraSceneCfg(CameraObjectTableSceneCfg):
+class DepthCameraSceneCfg(FrankaCameraObjectTableSceneCfg):
     """Scene with depth camera instead of RGB."""
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Camera",
