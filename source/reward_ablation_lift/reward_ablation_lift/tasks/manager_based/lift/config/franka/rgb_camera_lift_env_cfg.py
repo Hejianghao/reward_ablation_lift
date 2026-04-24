@@ -20,7 +20,7 @@ class RGBCameraLiftSceneCfg(ObjectTableSceneCfg):
         prim_path="{ENV_REGEX_NS}/Robot/panda_hand/Camera",
         offset=TiledCameraCfg.OffsetCfg(
             pos=(0.0, 0.0, -0.05),
-            rot=(0.0, 0.0, 1.0, 0.0),
+            rot=(1.0, 0.0, 0.0, 0.0),
             convention="opengl",
         ),
         data_types=["rgb"],
