@@ -30,8 +30,8 @@ class RGBDCameraLiftSceneCfg(ObjectTableSceneCfg):
             horizontal_aperture=20.955,
             clipping_range=(0.1, 20.0),
         ),
-        width=120,
-        height=160,
+        width=240,
+        height=320,
     )
 
 
@@ -75,7 +75,7 @@ class RGBDCameraObservationsCfg(ObservationsCfg):
 @configclass
 class RGBDCameraLiftEnvCfg(BaselineLiftEnvCfg):
     # Replace scene with camera-enabled version
-    scene: RGBDCameraLiftSceneCfg = RGBDCameraLiftSceneCfg(num_envs=512, env_spacing=2.5)
+    scene: RGBDCameraLiftSceneCfg = RGBDCameraLiftSceneCfg(num_envs=256, env_spacing=2.5)
     observations: RGBDCameraObservationsCfg = RGBDCameraObservationsCfg()
 
     
