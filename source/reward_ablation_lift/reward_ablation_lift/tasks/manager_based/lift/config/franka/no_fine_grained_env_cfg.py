@@ -12,25 +12,25 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from isaaclab_tasks.manager_based.manipulation.lift import mdp
-from isaaclab_tasks.manager_based.manipulation.lift.lift_env_cfg import LiftEnvCfg
+from .baseline_lift_env_cfg import BaselineLiftEnvCfg
 
 ##
 # Pre-defined configs
 ##
 from isaaclab.markers.config import FRAME_MARKER_CFG  # isort: skip
-from isaaclab_assets.robots.franka import FRANKA_PANDA_CFG  # isort: skip
+from isaaclab_assets.robots.franka import FRANKA_PANDA_CFG
 
 
 @configclass
-class FrankaLiftNoFineGrainedEnvCfg(FrankaCubeLiftEnvCfg):
+class NoFineGrainedLiftEnvCfg(BaselineLiftEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
 
-        self.rewards.end_effector_position_tracking_fine_grained = None
+        self.rewards.object_goal_tracking_fine_grained = None
 
 @configclass
-class FrankaLiftNoFineGrainedEnvCfg_PLAY(FrankaLiftNoFineGrainedEnvCfg):
+class NoFineGrainedLiftEnvCfg_PLAY(NoFineGrainedLiftEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()

@@ -15,27 +15,27 @@ from . import agents
 ##
 
 gym.register(
-    id="IsaacLab-Lift-Baseline",
+    id="Baseline-Franka-Lift-Baseline",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.joint_pos_env_cfg:FrankaCubeLiftEnvCfg",
+        "env_cfg_entry_point": f"{__name__}.baseline_lift_env_cfg:BaselineLiftEnvCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
 
 gym.register(
-    id="IsaacLab-Lift-Baseline-Play",
+    id="Baseline-Franka-Lift-Play",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.joint_pos_env_cfg:FrankaCubeLiftEnvCfg_PLAY",
+        "env_cfg_entry_point": f"{__name__}.baseline_lift_env_cfg:BaselineLiftEnvCfg_PLAY",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
     disable_env_checker=True,
 )
 
 gym.register(
-    id="My-Lift-Ablation-No-Fine-Grained",
+    id="No-Fine-Grained-Franka-Lift",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": f"{__name__}.first_ablation_env_cfg:FrankaLiftNoFineGrainedEnvCfg",
@@ -45,7 +45,7 @@ gym.register(
 )
 
 gym.register(
-    id="My-Lift-Ablation-No-Fine-Grained-Play",
+    id="No-Fine-Grained-Franka-Lift-Play",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": f"{__name__}.first_ablation_env_cfg:FrankaLiftNoFineGrainedEnvCfg_PLAY",
