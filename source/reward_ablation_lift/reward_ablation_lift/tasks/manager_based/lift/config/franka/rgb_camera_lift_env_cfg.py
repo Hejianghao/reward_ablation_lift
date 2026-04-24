@@ -1,21 +1,20 @@
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
 from isaaclab.managers import ObservationTermCfg as ObsTerm
-from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.sensors import TiledCameraCfg, ContactSensorCfg
+from isaaclab.sensors import TiledCameraCfg
 import isaaclab.envs.mdp as mdp
 import isaaclab.sim as sim_utils
 from isaaclab.utils import configclass
 
 import reward_ablation_lift.tasks.manager_based.lift.mdp as lift_mdp
-from reward_ablation_lift.tasks.manager_based.lift.lift_env_cfg import ObjectTableSceneCfg, ObservationsCfg, RewardsCfg
+from reward_ablation_lift.tasks.manager_based.lift.lift_env_cfg import ObjectTableSceneCfg, ObservationsCfg
 
-from .joint_pos_env_cfg import FrankaCubeLiftEnvCfg
+from .baseline_lift_env_cfg import BaselineLiftEnvCfg
 from isaaclab.utils.noise.noise_cfg import GaussianNoiseCfg
 
 
 @configclass
-class CameraObjectTableSceneCfg(ObjectTableSceneCfg):
+class RGBCameraLiftSceneCfg(ObjectTableSceneCfg):
     """Scene with an added overhead tiled camera."""
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Camera",
@@ -66,29 +65,29 @@ class CameraObjectTableSceneCfg(ObjectTableSceneCfg):
     # )
 
 
+# @configclass
+# class RGBCameraLiftObjectTableSceneCfg(CameraObjectTableSceneCfg):
+#     """Camera scene with contact sensors on Franka finger tips."""
+
+#     contact_sensor_finger_1: ContactSensorCfg = ContactSensorCfg(
+#         prim_path="{ENV_REGEX_NS}/Robot/panda_leftfinger",
+#         update_period=0.0,
+#         history_length=6,
+#         debug_vis=False,
+#         filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
+#     )
+
+#     contact_sensor_finger_2: ContactSensorCfg = ContactSensorCfg(
+#         prim_path="{ENV_REGEX_NS}/Robot/panda_rightfinger",
+#         update_period=0.0,
+#         history_length=6,
+#         debug_vis=False,
+#         filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
+#     )
+
+
 @configclass
-class FrankaCameraObjectTableSceneCfg(CameraObjectTableSceneCfg):
-    """Camera scene with contact sensors on Franka finger tips."""
-
-    contact_sensor_finger_1: ContactSensorCfg = ContactSensorCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/panda_leftfinger",
-        update_period=0.0,
-        history_length=6,
-        debug_vis=False,
-        filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
-    )
-
-    contact_sensor_finger_2: ContactSensorCfg = ContactSensorCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/panda_rightfinger",
-        update_period=0.0,
-        history_length=6,
-        debug_vis=False,
-        filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
-    )
-
-
-@configclass
-class RGBCameraObservationsCfg(ObservationsCfg):
+class RGBCameraLiftObservationsCfg(ObservationsCfg):
     """Observation specifications for the visuomotor lift policy."""
 
     @configclass
@@ -112,48 +111,24 @@ class RGBCameraObservationsCfg(ObservationsCfg):
             self.concatenate_terms = False
 
     policy: PolicyCfg = PolicyCfg()
-
-
-@configclass
-class RGBCameraRewardsCfg(RewardsCfg):
-    """Reward terms for the RGB camera lift task."""
-    # same reward terms as in the base env
-    reaching_object = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.25}, weight=1.0)
-
-    reaching_object_fine_grained = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
-
-    grasping_object = RewTerm(
-        func=lift_mdp.object_is_grasped,
-        params={"normal_force_threshold": 3.0},
-        weight=5.0,
-    )
-
-    lifting_object = RewTerm(
-        func=lift_mdp.object_lift_height,
-        params={"resting_z": 0.03, "target_height": 0.3, "std": 0.1, "normal_force_threshold": 3.0},
-        weight=20.0,
-    )
     
 
 
 @configclass
-class FrankaCubeLiftRGBCameraEnvCfg(FrankaCubeLiftEnvCfg):
+class RGBCameraLiftEnvCfg(BaselineLiftEnvCfg):
     # Replace scene with camera-enabled version
-    scene: FrankaCameraObjectTableSceneCfg = FrankaCameraObjectTableSceneCfg(num_envs=512, env_spacing=2.5)
-    observations: RGBCameraObservationsCfg = RGBCameraObservationsCfg()
-    rewards: RGBCameraRewardsCfg = RGBCameraRewardsCfg()
+    scene: RGBCameraLiftSceneCfg = RGBCameraLiftSceneCfg(num_envs=512, env_spacing=2.5)
+    observations: RGBCameraLiftObservationsCfg = RGBCameraLiftObservationsCfg()
 
     
 
     def __post_init__(self):
         # parent sets scene.robot, scene.object, scene.ee_frame
         super().__post_init__()
-        # required so panda fingers expose the contact reporter API
-        self.scene.robot.spawn.activate_contact_sensors = True
 
 
 @configclass
-class FrankaCubeLiftRGBCameraEnvCfg_PLAY(FrankaCubeLiftRGBCameraEnvCfg):
+class RGBCameraLiftEnvCfg_PLAY(RGBCameraLiftEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.scene.num_envs = 50

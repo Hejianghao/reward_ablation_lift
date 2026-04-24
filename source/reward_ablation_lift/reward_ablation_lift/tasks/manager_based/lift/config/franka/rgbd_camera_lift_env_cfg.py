@@ -5,20 +5,17 @@ from isaaclab.sensors import TiledCameraCfg
 import isaaclab.envs.mdp as mdp
 import isaaclab.sim as sim_utils
 from isaaclab.utils import configclass
-from isaaclab.utils.noise.noise_cfg import GaussianNoiseCfg
 
 import reward_ablation_lift.tasks.manager_based.lift.mdp as lift_mdp
+from reward_ablation_lift.tasks.manager_based.lift.lift_env_cfg import ObjectTableSceneCfg, ObservationsCfg
 
-from .rgb_camera_env_cfg import (
-    FrankaCameraObjectTableSceneCfg,
-    RGBCameraObservationsCfg,
-    FrankaCubeLiftRGBCameraEnvCfg,
-)
+from .baseline_lift_env_cfg import BaselineLiftEnvCfg
+from isaaclab.utils.noise.noise_cfg import GaussianNoiseCfg
 
 
 @configclass
-class DepthCameraSceneCfg(FrankaCameraObjectTableSceneCfg):
-    """Scene with depth camera instead of RGB."""
+class RGBDCameraLiftSceneCfg(ObjectTableSceneCfg):
+    """Scene with an added overhead tiled camera."""
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Camera",
         offset=TiledCameraCfg.OffsetCfg(
@@ -26,7 +23,7 @@ class DepthCameraSceneCfg(FrankaCameraObjectTableSceneCfg):
             rot=(0.7071068, 0.0, 0.7071068, 0.0),
             convention="world",
         ),
-        data_types=["depth"],
+        data_types=["rgb", "depth"],
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=48.0,
             focus_distance=400.0,
@@ -39,19 +36,29 @@ class DepthCameraSceneCfg(FrankaCameraObjectTableSceneCfg):
 
 
 @configclass
-class DepthCameraObservationsCfg(RGBCameraObservationsCfg):
-    """Observations using depth image instead of RGB."""
+class RGBDCameraObservationsCfg(ObservationsCfg):
+    """Observation specifications for the visuomotor lift policy."""
 
     @configclass
     class PolicyCfg(ObsGroup):
-        """Depth image + proprio."""
+        """Return image and proprio observations as separate dictionary entries."""
 
         image = ObsTerm(
             func=mdp.image,
             params={
+                "sensor_cfg": SceneEntityCfg("tiled_camera"), 
+                "data_type": "rgb", 
+                "normalize": True,
+            },
+            noise=GaussianNoiseCfg(mean=0.0, std=0.04),
+        )
+
+        depth_image = ObsTerm(
+            func=mdp.image,
+            params={
                 "sensor_cfg": SceneEntityCfg("tiled_camera"),
                 "data_type": "depth",
-                "normalize": False,
+                "normalize": True,
             },
             noise=GaussianNoiseCfg(mean=0.0, std=0.003),
         )
@@ -66,18 +73,20 @@ class DepthCameraObservationsCfg(RGBCameraObservationsCfg):
 
 
 @configclass
-class FrankaCubeLiftDepthCameraEnvCfg(FrankaCubeLiftRGBCameraEnvCfg):
-    scene: DepthCameraSceneCfg = DepthCameraSceneCfg(num_envs=512, env_spacing=2.5)
-    observations: DepthCameraObservationsCfg = DepthCameraObservationsCfg()
+class RGBDCameraLiftEnvCfg(BaselineLiftEnvCfg):
+    # Replace scene with camera-enabled version
+    scene: RGBDCameraLiftSceneCfg = RGBDCameraLiftSceneCfg(num_envs=512, env_spacing=2.5)
+    observations: RGBDCameraObservationsCfg = RGBDCameraObservationsCfg()
+
+    
 
     def __post_init__(self):
+        # parent sets scene.robot, scene.object, scene.ee_frame
         super().__post_init__()
-        # required so panda fingers expose the contact reporter API
-        self.scene.robot.spawn.activate_contact_sensors = True
 
 
 @configclass
-class FrankaCubeLiftDepthCameraEnvCfg_PLAY(FrankaCubeLiftDepthCameraEnvCfg):
+class RGBDCameraLiftEnvCfg_PLAY(RGBDCameraLiftEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.scene.num_envs = 50

@@ -18,19 +18,18 @@ models:
     max_log_std: 2.0
     initial_log_std: 0.0
     network:
-      - name: cnn_features
-        input: permute(OBSERVATIONS["image"], (0, 3, 1, 2))  # (B, 1, H, W) for depth
+      - name: depth_features
+        input: permute(OBSERVATIONS["depth_image"], (0, 3, 1, 2))
         layers:
-          - conv2d: {out_channels: 16, kernel_size: 8, stride: 4, padding: 0}
-          - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
-          - flatten
-          - linear: 64
+            - conv2d: {out_channels: 16, kernel_size: 8, stride: 4, padding: 0}
+            - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
+            - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
+            - flatten
+            - linear: 64
         activations: [relu, relu, relu, null, relu]
-
       - name: net
-        input: concatenate([cnn_features, OBSERVATIONS["proprio"]])
-        layers: [64, 128]
+        input: concatenate([depth_features, OBSERVATIONS["proprio"]])
+        layers: [256, 128, 64]
         activations: elu
     output: ACTIONS
 
@@ -38,19 +37,18 @@ models:
     class: DeterministicMixin
     clip_actions: False
     network:
-      - name: cnn_features
-        input: permute(OBSERVATIONS["image"], (0, 3, 1, 2))  # (B, 1, H, W) for depth
+      - name: depth_features
+        input: permute(OBSERVATIONS["depth_image"], (0, 3, 1, 2))
         layers:
-          - conv2d: {out_channels: 16, kernel_size: 8, stride: 4, padding: 0}
-          - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
-          - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
-          - flatten
-          - linear: 64
+            - conv2d: {out_channels: 16, kernel_size: 8, stride: 4, padding: 0}
+            - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
+            - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
+            - flatten
+            - linear: 64
         activations: [relu, relu, relu, null, relu]
-
       - name: net
-        input: concatenate([cnn_features, OBSERVATIONS["proprio"]])
-        layers: [64, 128]
+        input: concatenate([depth_features, OBSERVATIONS["proprio"]])
+        layers: [256, 128, 64]
         activations: elu
     output: ONE
 

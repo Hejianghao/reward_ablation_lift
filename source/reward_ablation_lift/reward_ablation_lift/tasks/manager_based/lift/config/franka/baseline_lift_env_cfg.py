@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from isaaclab.assets import RigidObjectCfg
-from isaaclab.sensors import FrameTransformerCfg
+from isaaclab.sensors import ContactSensorCfg, FrameTransformerCfg
 from isaaclab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from isaaclab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
 from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
@@ -22,13 +22,14 @@ from isaaclab_assets.robots.franka import FRANKA_PANDA_CFG  # isort: skip
 
 
 @configclass
-class FrankaCubeLiftEnvCfg(LiftEnvCfg):
+class BaselineLiftEnvCfg(LiftEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
 
         # Set Franka as robot
         self.scene.robot = FRANKA_PANDA_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot.spawn.activate_contact_sensors = True
 
         # Set actions for the specific robot type (franka)
         self.actions.arm_action = mdp.JointPositionActionCfg(
@@ -80,9 +81,26 @@ class FrankaCubeLiftEnvCfg(LiftEnvCfg):
             ],
         )
 
+        self.scene.contact_sensor_finger_1 = ContactSensorCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/panda_leftfinger",
+            update_period=0.0,
+            history_length=6,
+            debug_vis=False,
+            filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
+        )
+
+        self.scene.contact_sensor_finger_2 = ContactSensorCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/panda_rightfinger",
+            update_period=0.0,
+            history_length=6,
+            debug_vis=False,
+            filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
+        )
+
+
 
 @configclass
-class FrankaCubeLiftEnvCfg_PLAY(FrankaCubeLiftEnvCfg):
+class BaselineLiftEnvCfg_PLAY(BaselineLiftEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
