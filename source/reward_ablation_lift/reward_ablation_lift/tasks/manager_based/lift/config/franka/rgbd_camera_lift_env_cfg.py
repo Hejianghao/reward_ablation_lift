@@ -19,9 +19,8 @@ class RGBDCameraLiftSceneCfg(ObjectTableSceneCfg):
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Camera",
         offset=TiledCameraCfg.OffsetCfg(
-            pos=(0.55, 0.0, 1.7),
-            rot=(0.7071068, 0.0, 0.7071068, 0.0),
-            convention="world",
+            pos=(0.05, 0.0, 0.0),
+            rot=(1.0, 0.0, 0.0, 0.0),
         ),
         data_types=["rgb", "depth"],
         spawn=sim_utils.PinholeCameraCfg(
@@ -30,8 +29,8 @@ class RGBDCameraLiftSceneCfg(ObjectTableSceneCfg):
             horizontal_aperture=20.955,
             clipping_range=(0.1, 20.0),
         ),
-        width=240,
-        height=320,
+        width=160,
+        height=120,
     )
 
 

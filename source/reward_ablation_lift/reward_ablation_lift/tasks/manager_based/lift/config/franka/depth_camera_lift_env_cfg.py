@@ -19,9 +19,8 @@ class DepthCameraLiftSceneCfg(ObjectTableSceneCfg):
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Robot/panda_hand/Camera",
         offset=TiledCameraCfg.OffsetCfg(
-            pos=(0.0, 0.0, -0.05),
-            rot=(0.0, 0.0, 1.0, 0.0),
-            convention="opengl",
+            pos=(0.05, 0.0, 0.0),
+            rot=(1.0, 0.0, 0.0, 0.0),
         ),
         data_types=["depth"],
         spawn=sim_utils.PinholeCameraCfg(
@@ -30,8 +29,8 @@ class DepthCameraLiftSceneCfg(ObjectTableSceneCfg):
             horizontal_aperture=20.955,
             clipping_range=(0.02, 2.0),  # 近端截断改小，避免近距裁剪
         ),
-        width=120,
-        height=160,
+        width=160,
+        height=120,
     )
 
 
