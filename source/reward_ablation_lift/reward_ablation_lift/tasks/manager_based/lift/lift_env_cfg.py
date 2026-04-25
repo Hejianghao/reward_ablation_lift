@@ -165,6 +165,12 @@ class RewardsCfg:
         weight=5.0,
     )
 
+    # velocity reward (disabled by default; enabled in VelocityLiftEnvCfg)
+    ee_velocity_near_object: RewTerm | None = None
+
+    # alignment reward (disabled by default; enabled in AlignmentLiftEnvCfg)
+    ee_vertical_alignment: RewTerm | None = None
+
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
 
