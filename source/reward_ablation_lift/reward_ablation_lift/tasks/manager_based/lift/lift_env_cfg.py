@@ -155,7 +155,7 @@ class RewardsCfg:
     grasping_object = RewTerm(
         func=lift_mdp.object_is_grasped,
         params={"normal_force_threshold": 3.0},
-        weight=5.0,
+        weight=10.0,
     )
 
     lifting_object = RewTerm(
