@@ -25,11 +25,11 @@ models:
             - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
             - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
             - flatten
-            - linear: 256
+            - linear: 64
         activations: [relu, relu, relu, null, relu]
       - name: net
         input: concatenate([depth_features, OBSERVATIONS["proprio"]])
-        layers: [256, 128, 64]
+        layers: [128, 64]
         activations: elu
     output: ACTIONS
 
@@ -44,11 +44,11 @@ models:
             - conv2d: {out_channels: 16, kernel_size: 4, stride: 2, padding: 0}
             - conv2d: {out_channels: 32, kernel_size: 3, stride: 1, padding: 0}
             - flatten
-            - linear: 256
+            - linear: 64
         activations: [relu, relu, relu, null, relu]
       - name: net
         input: concatenate([depth_features, OBSERVATIONS["proprio"]])
-        layers: [256, 128, 64]
+        layers: [128, 64]
         activations: elu
     output: ONE
 
