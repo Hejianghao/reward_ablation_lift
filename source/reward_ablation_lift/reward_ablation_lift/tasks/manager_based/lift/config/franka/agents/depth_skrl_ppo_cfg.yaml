@@ -29,7 +29,7 @@ models:
         activations: [relu, relu, relu, null, relu]
       - name: net
         input: concatenate([depth_features, OBSERVATIONS["proprio"]])
-        layers: [256, 128, 64]
+        layers: [64, 128]
         activations: elu
     output: ACTIONS
 
@@ -48,7 +48,7 @@ models:
         activations: [relu, relu, relu, null, relu]
       - name: net
         input: concatenate([depth_features, OBSERVATIONS["proprio"]])
-        layers: [256, 128, 64]
+        layers: [64, 128]
         activations: elu
     output: ONE
 
