@@ -152,15 +152,15 @@ class RewardsCfg:
 
     reaching_object_fine_grained = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
 
-    grasping_object = RewTerm(
-        func=lift_mdp.object_is_grasped,
-        params={"normal_force_threshold": 3.0},
-        weight=10.0,
-    )
+    # grasping_object = RewTerm(
+    #     func=lift_mdp.object_is_grasped,
+    #     params={"normal_force_threshold": 3.0},
+    #     weight=10.0,
+    # )
 
     lifting_object = RewTerm(
         func=lift_mdp.object_lift_height,
-        params={"resting_z": 0.03, "target_height": 0.3, "std": 0.1, "normal_force_threshold": 3.0},
+        params={"resting_z": 0.03, "target_height": 0.3, "std": 0.3, "normal_force_threshold": 3.0},
         weight=20.0,
     )
 
