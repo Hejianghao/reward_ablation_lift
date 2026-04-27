@@ -165,8 +165,14 @@ class RewardsCfg:
 
     lifting_object = RewTerm(
         func=lift_mdp.object_lift_height,
-        params={"resting_z": 0.03, "std": 0.3, "normal_force_threshold": 3.0},
-        weight=20.0,
+        params={"std": 0.3, "normal_force_threshold": 3.0},
+        weight=15.0,
+    )
+
+    lifting_object_fine_grained = RewTerm(
+        func=lift_mdp.object_lift_height,
+        params={"std": 0.05, "normal_force_threshold": 3.0},
+        weight=15.0,
     )
 
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
