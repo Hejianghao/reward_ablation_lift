@@ -42,7 +42,7 @@ class BaselineLiftEnvCfg(LiftEnvCfg):
             close_command_expr={"panda_finger_.*": 0.0},
         )
         # Set the body name for the end effector
-        # self.commands.object_pose.body_name = "panda_hand"
+        self.commands.target_pos.body_name = "panda_hand"
 
         # Set Cube as object
         self.scene.object = RigidObjectCfg(
@@ -86,7 +86,7 @@ class BaselineLiftEnvCfg(LiftEnvCfg):
             update_period=0.0,
             history_length=6,
             debug_vis=False,
-            filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
+            # filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
         )
 
         self.scene.contact_sensor_finger_2 = ContactSensorCfg(
@@ -94,7 +94,7 @@ class BaselineLiftEnvCfg(LiftEnvCfg):
             update_period=0.0,
             history_length=6,
             debug_vis=False,
-            filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
+            # filter_prim_paths_expr=["{ENV_REGEX_NS}/Object"],
         )
 
 

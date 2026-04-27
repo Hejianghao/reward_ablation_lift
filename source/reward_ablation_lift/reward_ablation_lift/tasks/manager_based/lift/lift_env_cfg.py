@@ -73,13 +73,13 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command terms for the MDP."""
 
-    object_pose = mdp.UniformPoseCommandCfg(
+    target_pos = mdp.UniformPoseCommandCfg(
         asset_name="robot",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
         debug_vis=False,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.4, 0.6), pos_y=(-0.25, 0.25), pos_z=(0.25, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+            pos_x=(0.4, 0.6), pos_y=(-0.1, 0.1), pos_z=(0.25, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -100,6 +100,16 @@ class MetricsCfg(ObsGroup):
         func=lift_mdp.lift_episode_success_rate,
     )
 
+    success_rate = ObsTerm(
+        func=lift_mdp.success_rate,
+        params={
+            "distance_threshold": 0.02,
+            "sustained_steps": 50,
+            "command_name": "target_pos",
+            "robot_cfg": SceneEntityCfg("robot"),
+        },
+    )
+
     def __post_init__(self):
         self.enable_corruption = False
         self.concatenate_terms = False
@@ -114,7 +124,10 @@ class ObservationsCfg:
 
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
-        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        object_position = ObsTerm(func=lift_mdp.object_position_in_robot_root_frame)
+
+        ee_position = ObsTerm(func=lift_mdp.ee_position_in_robot_root_frame)
+        target_position = ObsTerm(func=lift_mdp.object_goal_position_in_robot_root_frame)
 
         actions = ObsTerm(func=mdp.last_action)
 
@@ -152,15 +165,17 @@ class RewardsCfg:
 
     reaching_object_fine_grained = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
 
-    # grasping_object = RewTerm(
-    #     func=lift_mdp.object_is_grasped,
-    #     params={"normal_force_threshold": 3.0},
-    #     weight=10.0,
-    # )
+    # object_lifted = RewTerm(func=lift_mdp.object_is_lifted, params={"minimal_height": 0.05}, weight=5.0)
 
-    lifting_object = RewTerm(
-        func=lift_mdp.object_lift_height,
-        params={"resting_z": 0.03, "target_height": 0.3, "std": 0.3, "normal_force_threshold": 3.0},
+    object_goal_distance = RewTerm(
+        func=lift_mdp.object_goal_distance,
+        params={"std": 0.3, "command_name": "target_pos", "normal_force_threshold": 3.0},
+        weight=15.0,
+    )
+
+    object_goal_distance_fine_grained = RewTerm(
+        func=lift_mdp.object_goal_distance,
+        params={"std": 0.05, "command_name": "target_pos", "normal_force_threshold": 3.0},
         weight=20.0,
     )
 
@@ -211,7 +226,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
-    # commands: CommandsCfg = CommandsCfg()
+    commands: CommandsCfg = CommandsCfg()
 
     # MDP settings
     rewards: RewardsCfg = RewardsCfg()

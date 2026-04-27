@@ -42,10 +42,18 @@ def ee_position_in_robot_root_frame(
     return ee_frame.data.target_pos_source[:, 0, :]
 
 
+def object_goal_position_in_robot_root_frame(
+    env: ManagerBasedRLEnv,
+    command_name: str = "target_pos",
+) -> torch.Tensor:
+    """The target object position (xyz) in the robot root frame, from the command manager."""
+    return env.command_manager.get_command(command_name)[:, :3]
+
+
 def proprio_observations(
     env: ManagerBasedRLEnv,
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-    command_name: str = "object_pose",
+    command_name: str = "target_pos",
     action_name: str | None = None,
 ) -> torch.Tensor:
     """Robot proprioception plus task command, excluding any direct object-state observation."""
@@ -53,6 +61,7 @@ def proprio_observations(
     joint_vel = mdp.joint_vel_rel(env, asset_cfg=robot_cfg)
 
     ee_pos = ee_position_in_robot_root_frame(env)
+    target_position = object_goal_position_in_robot_root_frame(env, command_name=command_name)
 
     actions = mdp.last_action(env, action_name=action_name)
-    return torch.cat([joint_pos, joint_vel, ee_pos, actions], dim=-1)
+    return torch.cat([joint_pos, joint_vel, ee_pos, target_position, actions], dim=-1)
