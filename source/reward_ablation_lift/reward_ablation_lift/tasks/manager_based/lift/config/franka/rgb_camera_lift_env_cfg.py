@@ -34,7 +34,7 @@ class RGBCameraLiftSceneCfg(ObjectTableSceneCfg):
             focal_length=10.0,
             focus_distance=400.0,
             horizontal_aperture=20.955,
-            clipping_range=(0.02, 2.0),  # 近端截断改小，避免近距裁剪
+            clipping_range=(0.005, 2.0),  # 近端截断改小，避免近距裁剪
         ),
         width=160,
         height=120,
@@ -64,7 +64,7 @@ class RGBCameraLiftSceneCfg(ObjectTableSceneCfg):
     #         ],
     #         height=120,
     #         width=160,
-    #         clipping_range=(0.01, 10.0),
+    #         clipping_range=(0.005, 2.0),
     #     ),
     #     height=120,
     #     width=160,
