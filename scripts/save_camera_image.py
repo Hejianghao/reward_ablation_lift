@@ -41,16 +41,25 @@ def main():
         env.step(action)
     print(f"[INFO] Stepped {num_steps} steps ({num_steps * step_dt:.3f}s) before capturing.")
 
-    # Raw sensor tensor: [num_envs, H, W, C], uint8 in [0, 255]
-    camera_data = env.unwrapped.scene["tiled_camera"].data.output["rgb"]
-    frame = camera_data[0]  # first env
+    output = env.unwrapped.scene["tiled_camera"].data.output
 
-    if frame.is_floating_point():
-        frame = (frame.clamp(0.0, 1.0) * 255).byte()
+    if "rgb" in output:
+        frame = output["rgb"][0]
+        if frame.is_floating_point():
+            frame = (frame.clamp(0.0, 1.0) * 255).byte()
+        img = Image.fromarray(frame.cpu().numpy(), mode="RGB")
+        img.save(args_cli.output)
+        print(f"[INFO] RGB image saved to: {args_cli.output}")
 
-    img = Image.fromarray(frame.cpu().numpy(), mode="RGB")
-    img.save(args_cli.output)
-    print(f"[INFO] Camera image saved to: {args_cli.output}")
+    if "depth" in output:
+        depth = output["depth"][0, :, :, 0].float()
+        depth[depth == float("inf")] = 0
+        max_val = depth.max()
+        if max_val > 0:
+            depth = (depth / max_val * 255).byte()
+        depth_path = args_cli.output.replace(".png", "_depth.png")
+        Image.fromarray(depth.cpu().numpy(), mode="L").save(depth_path)
+        print(f"[INFO] Depth image saved to: {depth_path}")
 
     env.close()
 
