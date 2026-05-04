@@ -30,6 +30,7 @@ class BaselineLiftEnvCfg(LiftEnvCfg):
         # Set Franka as robot
         self.scene.robot = FRANKA_PANDA_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.robot.spawn.activate_contact_sensors = True
+        self.scene.num_envs = 512
 
         # Set actions for the specific robot type (franka)
         self.actions.arm_action = mdp.JointPositionActionCfg(
