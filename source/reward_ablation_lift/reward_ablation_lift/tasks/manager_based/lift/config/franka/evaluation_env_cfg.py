@@ -1,5 +1,3 @@
-# eval_envs.py（或者分散到几个文件里）
-
 from isaaclab.utils import configclass
 
 from .baseline_lift_env_cfg import BaselineLiftEnvCfg
@@ -7,30 +5,61 @@ from .rgb_camera_lift_env_cfg import RGBCameraLiftEnvCfg
 from .depth_camera_lift_env_cfg import DepthCameraLiftEnvCfg
 from .rgbd_camera_lift_env_cfg import RGBDCameraLiftEnvCfg
 
-# === ID Baseline（其实就是 PLAY 配置）===
+
+# --- 公共 eval 设置 ---
+
+def _eval_defaults(cfg):
+    cfg.scene.num_envs = 256
+    cfg.observations.policy.enable_corruption = False
+
+def _apply_color_ood(cfg):
+    cfg.scene.object.init_state.rot = (0.7071, 0.0, -0.7071, 0.0)
+
+def _apply_size_ood(cfg):
+    cfg.scene.object.spawn.scale = (1.0, 1.0, 1.0)
+
+
+# === Baseline Eval ===
+
 @configclass
 class BaselineLiftEnvCfg_EVAL_ID(BaselineLiftEnvCfg):
     def __post_init__(self):
         super().__post_init__()
-        self.scene.num_envs = 256
-        self.observations.policy.enable_corruption = False
+        _eval_defaults(self)
 
-# === OOD: Color ===
 @configclass
 class BaselineLiftEnvCfg_EVAL_COLOR(BaselineLiftEnvCfg):
     def __post_init__(self):
         super().__post_init__()
-        self.scene.num_envs = 256
-        self.observations.policy.enable_corruption = False
-        # 改 cube 颜色为蓝色
-        self.scene.object.init_state.rot = (0.7071, 0.0, 0.0, 0.7071)
+        _eval_defaults(self)
+        _apply_color_ood(self)
 
-# === OOD: Size ===
 @configclass
 class BaselineLiftEnvCfg_EVAL_SIZE(BaselineLiftEnvCfg):
     def __post_init__(self):
         super().__post_init__()
-        self.scene.num_envs = 256
-        self.observations.policy.enable_corruption = False
-        # 改大一点
-        self.scene.object.spawn.scale = (1.5, 1.5, 1.5)
+        _eval_defaults(self)
+        _apply_size_ood(self)
+
+
+# === RGB Camera Eval ===
+
+@configclass
+class RGBCameraLiftEnvCfg_EVAL_ID(RGBCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+
+@configclass
+class RGBCameraLiftEnvCfg_EVAL_COLOR(RGBCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_color_ood(self)
+
+@configclass
+class RGBCameraLiftEnvCfg_EVAL_SIZE(RGBCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_size_ood(self)

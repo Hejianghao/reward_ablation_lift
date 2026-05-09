@@ -58,10 +58,13 @@ parser.add_argument(
 )
 parser.add_argument("--real-time", action="store_true", default=False, help="Run in real-time, if possible.")
 parser.add_argument(
-    "--eval_steps",
+    "--eval_episodes",
     type=int,
     default=None,
-    help="Number of environment steps to evaluate. Defaults to running until the simulator is closed.",
+    help=(
+        "Number of episodes to evaluate per environment. "
+        "For example, with 516 environments and --eval_episodes 1, evaluation stops after 516 completed episodes."
+    ),
 )
 parser.add_argument(
     "--eval_log_name",
@@ -188,9 +191,34 @@ def _write_extra_logs(writer: SummaryWriter, extras: Mapping | None, step: int) 
     return logged_count
 
 
+def _done_mask(dones) -> torch.Tensor:
+    """Convert done signals from single-agent or multi-agent envs into a per-env boolean mask."""
+    if isinstance(dones, Mapping):
+        masks = [_done_mask(value) for value in dones.values()]
+        if not masks:
+            raise ValueError("Done mapping is empty.")
+        combined_mask = masks[0]
+        for mask in masks[1:]:
+            combined_mask = combined_mask | mask
+        return combined_mask
+
+    if isinstance(dones, torch.Tensor):
+        dones = dones.to(dtype=torch.bool)
+        if dones.ndim == 0:
+            return dones.reshape(1)
+        if dones.ndim == 1:
+            return dones
+        return dones.reshape(dones.shape[0], -1).any(dim=-1)
+
+    raise TypeError(f"Unsupported done signal type: {type(dones)}")
+
+
 @hydra_task_config(args_cli.task, agent_cfg_entry_point)
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, experiment_cfg: dict):
     """Evaluate with skrl agent and log environment extras."""
+    if args_cli.eval_episodes is not None and args_cli.eval_episodes < 1:
+        raise ValueError("--eval_episodes must be greater than or equal to 1.")
+
     # grab task name for checkpoint path
     task_name = args_cli.task.split(":")[-1]
     train_task_name = task_name.replace("-Play", "")
@@ -287,6 +315,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, expe
 
     # reset environment
     obs, _ = env.reset()
+    num_envs = getattr(env, "num_envs", env.unwrapped.num_envs)
+    completed_episodes = torch.zeros(num_envs, dtype=torch.long, device=env.unwrapped.device)
     timestep = 0
     # simulate environment
     while simulation_app.is_running():
@@ -303,16 +333,18 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, expe
             else:
                 actions = outputs[-1].get("mean_actions", outputs[0])
             # env stepping
-            obs, _, _, _, extras = env.step(actions)
+            obs, _, terminated, truncated, extras = env.step(actions)
+
+        completed_episodes += (_done_mask(terminated) | _done_mask(truncated)).to(dtype=torch.long)
 
         if isinstance(extras, Mapping) and isinstance(extras.get("log", None), Mapping):
             logged_keys.update(_flatten_log_dict(extras["log"]).keys())
         _write_extra_logs(writer, extras, timestep)
 
         timestep += 1
-        if args_cli.video and timestep == args_cli.video_length:
+        if args_cli.video and args_cli.eval_episodes is None and timestep == args_cli.video_length:
             break
-        if args_cli.eval_steps is not None and timestep >= args_cli.eval_steps:
+        if args_cli.eval_episodes is not None and torch.all(completed_episodes >= args_cli.eval_episodes).item():
             break
 
         # time delay for real-time evaluation
@@ -325,6 +357,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, expe
 
     print(f"Evaluation time: {round(time.time() - start_time, 2)} seconds")
     print(f"[INFO] Evaluation steps: {timestep}")
+    print(f"[INFO] Completed episodes: {int(completed_episodes.sum().item())}")
+    print(f"[INFO] Minimum completed episodes per environment: {int(completed_episodes.min().item())}")
     print(f"[INFO] Logged {len(logged_keys)} extras['log'] keys to TensorBoard.")
     if logged_keys:
         print("[INFO] Logged keys:")

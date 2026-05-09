@@ -107,3 +107,53 @@ gym.register(
     },
     disable_env_checker=True,
 )
+
+gym.register(
+    id="Baseline-Franka-Lift-Eval-Color",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.evaluation_env_cfg:BaselineLiftEnvCfg_EVAL_COLOR",
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+    },
+    disable_env_checker=True,
+)
+
+gym.register(
+    id="Baseline-Franka-Lift-Eval-Size",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.evaluation_env_cfg:BaselineLiftEnvCfg_EVAL_SIZE",
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+    },
+    disable_env_checker=True,
+)
+
+gym.register(
+    id="RGB-Franka-Lift-Eval-ID",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.evaluation_env_cfg:RGBCameraLiftEnvCfg_EVAL_ID",
+        "skrl_cfg_entry_point": f"{agents.__name__}:rgb_skrl_ppo_cfg.yaml",
+    },
+    disable_env_checker=True,
+)
+
+gym.register(
+    id="RGB-Franka-Lift-Eval-Color",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.evaluation_env_cfg:RGBCameraLiftEnvCfg_EVAL_COLOR",
+        "skrl_cfg_entry_point": f"{agents.__name__}:rgb_skrl_ppo_cfg.yaml",
+    },
+    disable_env_checker=True,
+)
+
+gym.register(
+    id="RGB-Franka-Lift-Eval-Size",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.evaluation_env_cfg:RGBCameraLiftEnvCfg_EVAL_SIZE",
+        "skrl_cfg_entry_point": f"{agents.__name__}:rgb_skrl_ppo_cfg.yaml",
+    },
+    disable_env_checker=True,
+)
