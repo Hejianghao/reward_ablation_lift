@@ -23,7 +23,7 @@ class BaselineLiftEnvCfg_EVAL_COLOR(BaselineLiftEnvCfg):
         self.scene.num_envs = 256
         self.observations.policy.enable_corruption = False
         # 改 cube 颜色为蓝色
-        self.scene.object.spawn.visual_material.diffuse_color = (0.0, 0.0, 1.0)
+        self.scene.object.init_state.rot = (0.7071, 0.0, 0.0, 0.7071)
 
 # === OOD: Size ===
 @configclass
@@ -32,18 +32,5 @@ class BaselineLiftEnvCfg_EVAL_SIZE(BaselineLiftEnvCfg):
         super().__post_init__()
         self.scene.num_envs = 256
         self.observations.policy.enable_corruption = False
-        # 改 cube 大小为 4cm 或 6cm
-        self.scene.object.spawn.size = (0.04, 0.04, 0.04)
-
-# === OOD: Position ===
-@configclass
-class BaselineLiftEnvCfg_EVAL_POSITION(BaselineLiftEnvCfg):
-    def __post_init__(self):
-        super().__post_init__()
-        self.scene.num_envs = 256
-        self.observations.policy.enable_corruption = False
-        # 扩大 spawn 范围
-        self.events.reset_object_position.params["pose_range"] = {
-            "x": (-0.2, 0.2),
-            "y": (-0.2, 0.2),
-        }
+        # 改大一点
+        self.scene.object.spawn.scale = (1.5, 1.5, 1.5)
