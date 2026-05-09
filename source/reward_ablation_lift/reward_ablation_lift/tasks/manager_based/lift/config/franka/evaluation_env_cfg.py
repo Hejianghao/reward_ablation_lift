@@ -42,6 +42,15 @@ class BaselineLiftEnvCfg_EVAL_SIZE(BaselineLiftEnvCfg):
         _apply_size_ood(self)
 
 
+@configclass
+class BaselineLiftEnvCfg_EVAL_COLOR_SIZE(BaselineLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_color_ood(self)
+        _apply_size_ood(self)
+
+
 # === RGB Camera Eval ===
 
 @configclass
@@ -62,4 +71,71 @@ class RGBCameraLiftEnvCfg_EVAL_SIZE(RGBCameraLiftEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         _eval_defaults(self)
+        _apply_size_ood(self)
+
+@configclass
+class RGBCameraLiftEnvCfg_EVAL_COLOR_SIZE(RGBCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_color_ood(self)
+        _apply_size_ood(self)
+
+
+# === Depth Camera Eval ===
+@configclass
+class DepthCameraLiftEnvCfg_EVAL_ID(DepthCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+
+@configclass
+class DepthCameraLiftEnvCfg_EVAL_COLOR(DepthCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_color_ood(self)
+
+@configclass
+class DepthCameraLiftEnvCfg_EVAL_SIZE(DepthCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_size_ood(self)
+
+@configclass
+class DepthCameraLiftEnvCfg_EVAL_COLOR_SIZE(DepthCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_color_ood(self)
+        _apply_size_ood(self)
+
+# === RGBD Camera Eval ===
+@configclass
+class RGBDCameraLiftEnvCfg_EVAL_ID(RGBDCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+
+@configclass
+class RGBDCameraLiftEnvCfg_EVAL_COLOR(RGBDCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_color_ood(self)
+
+@configclass
+class RGBDCameraLiftEnvCfg_EVAL_SIZE(RGBDCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_size_ood(self)
+
+@configclass
+class RGBDCameraLiftEnvCfg_EVAL_COLOR_SIZE(RGBDCameraLiftEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _eval_defaults(self)
+        _apply_color_ood(self)
         _apply_size_ood(self)
