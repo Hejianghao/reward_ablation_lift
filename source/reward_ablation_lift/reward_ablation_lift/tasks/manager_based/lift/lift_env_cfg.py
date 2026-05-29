@@ -22,7 +22,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from . import mdp
-import reward_ablation_lift.tasks.manager_based.lift.mdp as my_mdp
+import reward_ablation_lift.tasks.manager_based.lift.mdp as lift_mdp
 
 ##
 # Scene definition
@@ -72,16 +72,17 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 @configclass
 class CommandsCfg:
     """Command terms for the MDP."""
+    pass
 
-    object_pose = mdp.UniformPoseCommandCfg(
-        asset_name="robot",
-        body_name=MISSING,  # will be set by agent env cfg
-        resampling_time_range=(5.0, 5.0),
-        debug_vis=True,
-        ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.4, 0.6), pos_y=(-0.25, 0.25), pos_z=(0.25, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
-        ),
-    )
+    # object_pose = mdp.UniformPoseCommandCfg(
+    #     asset_name="robot",
+    #     body_name=MISSING,  # will be set by agent env cfg
+    #     resampling_time_range=(5.0, 5.0),
+    #     debug_vis=False,
+    #     ranges=mdp.UniformPoseCommandCfg.Ranges(
+    #         pos_x=(0.4, 0.6), pos_y=(-0.25, 0.25), pos_z=(0.25, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+    #     ),
+    # )
 
 
 @configclass
@@ -97,7 +98,11 @@ class MetricsCfg(ObsGroup):
     """Metrics logged to TensorBoard but not used as policy input."""
 
     lift_episode_success_rate = ObsTerm(
-        func=my_mdp.lift_episode_success_rate,
+        func=lift_mdp.lift_episode_success_rate,
+    )
+
+    goal_reached_success_rate = ObsTerm(
+        func=lift_mdp.success_rate,
     )
 
     def __post_init__(self):
@@ -115,7 +120,7 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
-        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -138,7 +143,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+            "pose_range": {"x": (-0.2, 0.2), "y": (-0.2, 0.2), "z": (0.0, 0.0)},
             "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
@@ -148,30 +153,28 @@ class EventCfg:
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
+    reaching_object = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.25}, weight=1.0)
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
+    reaching_object_fine_grained = RewTerm(func=lift_mdp.object_ee_distance, params={"std": 0.05}, weight=1.0)
 
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=15.0)
+    # grasping_object = RewTerm(
+    #     func=lift_mdp.object_is_grasped,
+    #     params={"normal_force_threshold": 3.0},
+    #     weight=10.0,
+    # )
 
-    object_goal_tracking = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=16.0,
+    lifting_object = RewTerm(
+        func=lift_mdp.object_lift_height,
+        params={"std": 0.3, "normal_force_threshold": 3.0},
+        weight=15.0,
     )
 
-    object_goal_tracking_fine_grained = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=5.0,
+    lifting_object_fine_grained = RewTerm(
+        func=lift_mdp.object_lift_height,
+        params={"std": 0.05, "normal_force_threshold": 3.0},
+        weight=15.0,
     )
 
-    # velocity reward (disabled by default; enabled in VelocityLiftEnvCfg)
-    ee_velocity_near_object: RewTerm | None = None
-
-    # alignment reward (disabled by default; enabled in AlignmentLiftEnvCfg)
-    ee_vertical_alignment: RewTerm | None = None
-
-    # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
 
     joint_vel = RewTerm(
@@ -214,12 +217,16 @@ class CurriculumCfg:
 class LiftEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lifting environment."""
 
+    # Task goal
+    target_height: float = 0.4
+
     # Scene settings
     scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
     commands: CommandsCfg = CommandsCfg()
+
     # MDP settings
     rewards: RewardsCfg = RewardsCfg()
     terminations: TerminationsCfg = TerminationsCfg()

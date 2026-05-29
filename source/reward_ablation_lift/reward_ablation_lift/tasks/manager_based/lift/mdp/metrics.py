@@ -41,10 +41,41 @@ def lift_episode_success_rate(env, minimal_height: float = 0.1, sustained_steps:
 
     return env._lift_ever_succeeded.float()
 
-def placement_success_rate(env, distance_threshold: float = 0.05):
+def success_rate(
+    env,
+    object_rest_z: float = 0.03,
+    height_threshold: float = 0.02,
+    sustained_steps: int = 50,
+):
     _ensure_log_dict(env)
-    cube_pos = env.scene["object"].data.root_pos_w[:, :2]
-    target_pos = env.scene["target"].data.root_pos_w[:, :2]
-    is_placed = ((cube_pos - target_pos).norm(dim=1) < distance_threshold).float()
-    env.extras["log"]["placement_success_rate"] = is_placed.mean()
-    return is_placed  # weight=0 to record only
+
+    target_height: float = env.cfg.target_height
+    cube_z = env.scene["object"].data.root_pos_w[:, 2]
+    delta_z = cube_z - object_rest_z
+    height_error = (delta_z - target_height).abs()
+    is_at_target = (height_error < height_threshold).bool()
+
+    if not hasattr(env, "_goal_ever_reached"):
+        env._goal_ever_reached = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
+        env._goal_consecutive_steps = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
+    if not hasattr(env, "_last_height_error"):
+        env._last_height_error = torch.zeros(env.num_envs, device=env.device)
+
+    just_reset = (env.episode_length_buf == 0)
+    if just_reset.any():
+        env.extras["log"]["goal_reached_success_rate"] = env._goal_ever_reached[just_reset].float().mean()
+        env.extras["log"]["height_error_rmse"] = torch.sqrt(torch.mean(env._last_height_error[just_reset] ** 2))
+        env._goal_ever_reached[just_reset] = False
+        env._goal_consecutive_steps[just_reset] = 0
+
+    env._last_height_error = height_error
+
+    env._goal_consecutive_steps = torch.where(
+        is_at_target,
+        env._goal_consecutive_steps + 1,
+        torch.zeros_like(env._goal_consecutive_steps),
+    )
+
+    env._goal_ever_reached |= (env._goal_consecutive_steps >= sustained_steps)
+
+    return env._goal_ever_reached.float()
